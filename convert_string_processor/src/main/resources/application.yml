@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    stream:
+      function:
+        bindings:
+          # Need to be aware of Spring bean name.
+          # java.util.function.Function type bean name-in-0
+          processConvertString-in-0: input
+          # java.util.function.Function type bean name-out-0
+          processConvertString-out-0: output
+      bindings:
+        # input refers and associates spring.cloud.stream.function.bindings.processConvertString-in-0=input
+        input:
+          # inbound queue topic name
+          destination: string-pipe-1
+        # output refers and associates spring.cloud.stream.function.bindings.processConvertString-out-0=output
+        output:
+          # outbound queue topic name
+          destination: string-pipe-2
