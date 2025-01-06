@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example.scdf.source'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // spring-boot-starter-actuator is needed to provide an endpoint for health checks, which also requires spring-boot-starter-web.
+    // Without this, the status will remain DEPLOYING when deploying a Stream with Spring Cloud Data Flow.
+    // However, it is not necessary to configure endpoint activation settings
+    // for Spring Actuator ('management.endpoints.web.exposure.include=*', etc.) in application.yml.
+    implementation platform("org.springframework.cloud:spring-cloud-dependencies:2024.0.0")
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.cloud:spring-cloud-stream'
+    implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // Suppress the following error messages displayed during test execution.
+    // OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+    jvmArgs '-Xshare:off'
+}
+
+// Prevent generation of Jar (string_source-0.0.1-SNAPSHOT-plain.jar) that does not contain any dependency libraries
+// and generate only Fat Jar (string_source-0.0.1-SNAPSHOT.jar) that contains all dependency libraries.
+// The intention is to avoid having to be aware that if two jar files are generated when imaging in the Dockerfile,
+// you will need to start the application with the one without the plain.
+// [in Dockerfile]
+// COPY --from=temporary_use_for_build_image /app/source/build/libs/*.jar app.jar
+// ENTRYPOINT [ "java", "-jar", "app.jar" ]
+jar {
+    enabled = false
+}
+
+bootJar {
+    enabled = true
+}

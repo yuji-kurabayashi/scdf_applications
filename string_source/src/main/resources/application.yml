@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    stream:
+      function:
+        bindings:
+          # Need to be aware of Spring bean name.
+          # java.util.function.Supplier type bean name-out-0
+          sendEvents-out-0: output
+      bindings:
+        # output refers and associates spring.cloud.stream.function.bindings.sendEvents-out-0=output
+        output:
+          # outbound queue topic name
+          destination: string-pipe-1
